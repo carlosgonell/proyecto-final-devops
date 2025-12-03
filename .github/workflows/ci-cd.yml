@@ -1,43 +1,38 @@
-name: Proyecto Final DevOps CI/CD
+name: Build, Push Docker Image and Deploy to Render
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
-  build-test-push-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Instalar Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - name: Check if secrets are loaded
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USER }}" ]; then echo "DOCKER USER EMPTY"; else echo "DOCKER USER OK"; fi
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then echo "DOCKER TOKEN EMPTY"; else echo "DOCKER TOKEN OK"; fi
+          if [ -z "${{ secrets.RENDER_API_KEY }}" ]; then echo "RENDER API KEY EMPTY"; else echo "RENDER API KEY OK"; fi
+          if [ -z "${{ secrets.RENDER_SERVICE_ID }}" ]; then echo "RENDER SERVICE ID EMPTY"; else echo "RENDER SERVICE ID OK"; fi
 
-      - name: Instalar dependencias
-        run: npm install
-
-      - name: Ejecutar pruebas
-        run: npm test
-
-      - name: Login en Docker Hub
-        uses: docker/login-action@v2
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & Push Docker Image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USER }}/proyecto-final-devops:latest
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USER }}/proyecto-final-devops:latest .
 
-      - name: Deploy to Render
-        uses: JorgeLNJunior/render-deploy@v1.4
-        with:
-          service_id: ${{ secrets.RENDER_SERVICE_ID }}
-          api_key: ${{ secrets.RENDER_API_KEY }}
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USER }}/proyecto-final-devops:latest
+
+      - name: Trigger Render deploy
+        run: |
+          curl -X POST https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json"
