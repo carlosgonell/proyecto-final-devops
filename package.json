@@ -1,0 +1,19 @@
+{
+  "name": "proyecto-final-devops",
+  "version": "1.0.0",
+  "description": "Proyecto Final DevOps",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Carlos",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
+  }
+}
