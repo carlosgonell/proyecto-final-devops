@@ -14,7 +14,7 @@ jobs:
 
       - name: Check if secrets are loaded
         run: |
-          if [ -z "${{ secrets.DOCKERHUB_USER }}" ]; then echo "DOCKER USER EMPTY"; else echo "DOCKER USER OK"; fi
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then echo "DOCKER USERNAME EMPTY"; else echo "DOCKER USERNAME OK"; fi
           if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then echo "DOCKER TOKEN EMPTY"; else echo "DOCKER TOKEN OK"; fi
           if [ -z "${{ secrets.RENDER_API_KEY }}" ]; then echo "RENDER API KEY EMPTY"; else echo "RENDER API KEY OK"; fi
           if [ -z "${{ secrets.RENDER_SERVICE_ID }}" ]; then echo "RENDER SERVICE ID EMPTY"; else echo "RENDER SERVICE ID OK"; fi
@@ -22,14 +22,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USER }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USER }}/proyecto-final-devops:latest .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/proyecto-final-devops:latest .
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKERHUB_USER }}/proyecto-final-devops:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/proyecto-final-devops:latest
 
       - name: Trigger Render deploy
         run: |
